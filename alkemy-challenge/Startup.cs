@@ -1,7 +1,10 @@
+using alkemy_challenge.BLL;
+using alkemy_challenge.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,13 +29,15 @@ namespace alkemy_challenge
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //inyeccion
+            services.AddTransient<IEmail, Email>();
+
             //configurar Auth con jwt
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-               .AddJwtBearer(options => {
-
+               .AddJwtBearer(options =>
+               {
                    options.TokenValidationParameters = new TokenValidationParameters
                    {
-                      
                        ValidateLifetime = true,
                        ValidateIssuer = true,
                        ValidateAudience = true,
@@ -40,7 +45,6 @@ namespace alkemy_challenge
                        ValidIssuer = Configuration["Jwt:Issuer"],
                        ValidAudience = Configuration["Jwt:Audience"],
                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
-                       
                    };
                });
 
@@ -49,6 +53,11 @@ namespace alkemy_challenge
             services.AddControllers();
 
             services.AddRazorPages();
+
+            ////agrego EF
+            services
+                .AddDbContext<Context>(options =>
+                      options.UseSqlServer(Configuration.GetConnectionString("Context")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,7 +81,6 @@ namespace alkemy_challenge
 
             //agrego auth al pipeline
             app.UseAuthentication();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,13 +9,21 @@ namespace alkemy_challenge.Models
 {
     public class Character
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
 
+        public Character()
+        {
+            this.CharacterMovies = new HashSet<CharacterMovie>();
+        }
+       
+        public int CharacterId { get; set; }
+        [Required]
+        public string Name { get; set; }
+        [Required]
         public string Image { get; set; }
 
-
+        [Required]
         public DateTime BirthDate { get; set; }
+       [NotMapped]
         public int Age
         {
             get
@@ -26,8 +36,10 @@ namespace alkemy_challenge.Models
             }
         }
 
+        [Required]
         public int Weigth { get; set; }
+        [Required]
         public string History { get; set; }
-        public IList<Movie> MoviesAppeared { get; set; }
+        public virtual IEnumerable<CharacterMovie> CharacterMovies { get; set; }
     }
 }
