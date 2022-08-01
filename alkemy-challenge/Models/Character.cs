@@ -14,16 +14,15 @@ namespace alkemy_challenge.Models
         {
             this.CharacterMovies = new HashSet<CharacterMovie>();
         }
-       
+
         public int CharacterId { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]
         public string Image { get; set; }
-
         [Required]
         public DateTime BirthDate { get; set; }
-       [NotMapped]
+        [NotMapped]
         public int Age
         {
             get

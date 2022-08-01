@@ -13,6 +13,7 @@ namespace alkemy_challenge.BLL
         private string _from;
         private string _passwordOrToken;
         private string _port;
+        private string _displayName;
 
 
         public Email(IConfiguration Configuration)
@@ -21,6 +22,7 @@ namespace alkemy_challenge.BLL
             _from = Configuration["Email:from"];
             _passwordOrToken = Configuration["Email:passwordOrToken"];
             _port = Configuration["Email:port"];
+            _displayName = Configuration["Email:displayName"];
         }
 
         /// <summary>
@@ -30,13 +32,14 @@ namespace alkemy_challenge.BLL
         /// <param name="subject"></param>
         /// <param name="to"></param>
         /// <param name="isHtml"></param>
-        public void SendEmail(string body, string subject, string to, string displayName ,bool isHtml = true)
+        public void SendEmail(string body, string subject, string to, string displayName="" ,bool isHtml = true)
         {
             try
             {
                 //para gmail
                 MailMessage message = new MailMessage(_from, to, subject, body);
-                message.From = new MailAddress(_from, displayName);
+                message.From = 
+                    new MailAddress(_from, String.IsNullOrEmpty(displayName)?_displayName:displayName);
                 message.IsBodyHtml = isHtml;
                 message.Body = body;
 
@@ -44,8 +47,8 @@ namespace alkemy_challenge.BLL
                 client.EnableSsl = true;
                 client.Port = Int32.Parse(_port);
                 client.Credentials = new System.Net.NetworkCredential(_from, _passwordOrToken);
-                //esto puede ir async y notificacion
-                client.Send(message);
+                // notificacion
+                client.SendAsync(message,null);
             }
             catch (Exception ex)
             {

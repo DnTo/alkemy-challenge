@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using alkemy_challenge.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace alkemy_challenge.Controllers
-{
+{  
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CharactersController : ControllerBase
@@ -22,23 +24,32 @@ namespace alkemy_challenge.Controllers
 
         // GET: api/Characters
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Character>>> GetCharacters()
+        
+        public async Task<JsonResult> GetCharacters()
         {
-            return await _context.Characters.ToListAsync();
+            return  new JsonResult( await _context
+                .Characters
+                .Select(x => new { id = x.CharacterId, name = x.Name, x.Image })
+                .ToListAsync());
         }
 
         // GET: api/Characters/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Character>> GetCharacter(int id)
+        public async Task<JsonResult> GetCharacter(int id)
         {
-            var character = await _context.Characters.FindAsync(id);
+            var character =  _context.Characters.Include("CharacterMovies").FirstOrDefault(x => x.CharacterId == id);
 
             if (character == null)
             {
-                return NotFound();
+
+                return NotFound(Json("404");
             }
 
-            return character;
+            //get movies
+            var movies = character.CharacterMovies.Select(m => new { m.Movie.Title }).ToList();
+            return new JsonResult(new { character = character, movies = movies });
+            //return  character;
+            
         }
 
         // PUT: api/Characters/5

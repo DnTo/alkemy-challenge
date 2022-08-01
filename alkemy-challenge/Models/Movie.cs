@@ -13,8 +13,6 @@ namespace alkemy_challenge.Models
         {
             this.CharacterMovies = new HashSet<CharacterMovie>();
         }
-
-
         public int MovieId { get; set; }
         [Required]
         public string Name { get; set; }
@@ -36,7 +34,6 @@ namespace alkemy_challenge.Models
 
 
         public virtual ICollection<CharacterMovie> CharacterMovies { get; set; }
-
     }
 
 }

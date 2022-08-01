@@ -29,9 +29,6 @@ namespace alkemy_challenge
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //inyeccion
-            services.AddTransient<IEmail, Email>();
-
             //configurar Auth con jwt
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                .AddJwtBearer(options =>
@@ -47,17 +44,18 @@ namespace alkemy_challenge
                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
                    };
                });
-
             //agrego soporte para mvc
-            services.AddMvc();
-            services.AddControllers();
+            services.AddControllersWithViews();
 
-            services.AddRazorPages();
+            //inyeccion de dependencias
+            services.AddScoped<IEmail, Email>(); //mismo objeto por request
+            services.AddTransient<AuthBusiness, AuthBusiness>();
 
             ////agrego EF
-            services
-                .AddDbContext<Context>(options =>
+            services.AddDbContext<Context>(options =>
                       options.UseSqlServer(Configuration.GetConnectionString("Context")));
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,8 +84,11 @@ namespace alkemy_challenge
             app.UseEndpoints(endpoints =>
             {
                 //agrego sosporte para los controladores
-                endpoints.MapControllers();
-                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute(
+                  name: "default",
+                  pattern: "{controller=auth}/{action=register}/");
+                //   endpoints.MapControllers();
+                // endpoints.MapRazorPages();
             });
         }
     }
