@@ -37,18 +37,28 @@ namespace alkemy_challenge.Controllers
         [HttpGet("{id}")]
         public async Task<JsonResult> GetCharacter(int id)
         {
-            var character =  _context.Characters.Include("CharacterMovies").FirstOrDefault(x => x.CharacterId == id);
-
-            if (character == null)
+            if (id != character.CharacterId)
             {
-
-                return NotFound(Json("404");
+                return BadRequest();
             }
 
-            //get movies
-            var movies = character.CharacterMovies.Select(m => new { m.Movie.Title }).ToList();
-            return new JsonResult(new { character = character, movies = movies });
-            //return  character;
+            _context.Entry(character).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CharacterExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
             
         }
 
